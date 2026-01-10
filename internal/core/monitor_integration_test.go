@@ -1,6 +1,7 @@
 package core
 
 import (
+	"context"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -73,18 +74,16 @@ func TestMonitorHTTPEndpoint(t *testing.T) {
 			server := httptest.NewServer(tt.serverHandler)
 			defer server.Close()
 
-			// TODO: Implement CheckService function in monitor.go
-			// result := CheckService(server.URL, tt.timeout)
-			//
-			// if result.Status != tt.expectedStatus {
-			//     t.Errorf("expected status %q, got %q", tt.expectedStatus, result.Status)
-			// }
-			//
-			// if result.Reason != tt.expectedReason {
-			//     t.Errorf("expected reason %q, got %q", tt.expectedReason, result.Reason)
-			// }
+			ctx := context.Background()
+			result := CheckService(ctx, server.URL, tt.timeout)
 
-			t.Skip("CheckService not yet implemented")
+			if result.Status != tt.expectedStatus {
+				t.Errorf("expected status %q, got %q", tt.expectedStatus, result.Status)
+			}
+
+			if result.Reason != tt.expectedReason {
+				t.Errorf("expected reason %q, got %q", tt.expectedReason, result.Reason)
+			}
 		})
 	}
 }
@@ -116,18 +115,16 @@ func TestMonitorWithAuth(t *testing.T) {
 // TestMonitorDNSFailure demonstrates handling DNS resolution failures
 func TestMonitorDNSFailure(t *testing.T) {
 	// Use an invalid hostname that will fail DNS resolution
-	_ = "http://this-domain-does-not-exist-12345.invalid" // invalidURL
+	invalidURL := "http://this-domain-does-not-exist-12345.invalid"
 
-	// TODO: Implement CheckService function
-	// result := CheckService(invalidURL, 5*time.Second)
-	//
-	// if result.Status != "down" {
-	//     t.Errorf("expected DNS failure to return down status, got: %q", result.Status)
-	// }
-	//
-	// if result.Reason != "dns_failure" {
-	//     t.Errorf("expected reason 'dns_failure', got: %q", result.Reason)
-	// }
+	ctx := context.Background()
+	result := CheckService(ctx, invalidURL, 5*time.Second)
 
-	t.Skip("CheckService not yet implemented")
+	if result.Status != "down" {
+		t.Errorf("expected DNS failure to return down status, got: %q", result.Status)
+	}
+
+	if result.Reason != "dns_failure" {
+		t.Errorf("expected reason 'dns_failure', got: %q", result.Reason)
+	}
 }

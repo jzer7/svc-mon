@@ -2,6 +2,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 
@@ -30,8 +31,9 @@ func main() {
 	var monitorCmd = &cobra.Command{
 		Use:   "monitor",
 		Short: "Start monitoring services",
-		Run: func(cmd *cobra.Command, args []string) {
-			core.StartMonitoring()
+		RunE: func(cmd *cobra.Command, args []string) error {
+			configPath, _ := cmd.Flags().GetString("config")
+			return core.Run(configPath)
 		},
 	}
 
@@ -40,7 +42,7 @@ func main() {
 		Use:   "version",
 		Short: "Print the version number",
 		Run: func(cmd *cobra.Command, args []string) {
-			log.Printf("svc-mon version %s", version)
+			fmt.Printf("svc-mon version %s\n", version)
 		},
 	}
 
