@@ -1,0 +1,87 @@
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+---
+version: "3"
+
+vars: {}
+
+tasks:
+  default:
+    cmds:
+      - task: unit
+      - task: integration
+      - task: e2e
+      - task: benchmarks
+    desc: run all tests
+
+  # --------------------------------------------------------
+  # Testing tasks: unit tests
+  # --------------------------------------------------------
+
+  unit:
+    cmds:
+      - go test -v ./...
+    desc: run all unit tests
+
+  coverage:
+    cmds:
+      - go test -coverprofile=coverage.out ./...
+      - go tool cover -html=coverage.out -o coverage.html
+      - cmd: echo "Coverage report generated at coverage.html"
+        silent: true
+    desc: generate code coverage report
+
+  # --------------------------------------------------------
+  # Testing tasks: integration
+  # --------------------------------------------------------
+
+  integration:
+    cmds:
+      - echo "Running integration tests with httptest..."
+      - go test -v -run "Integration" ./internal/core/
+    desc: run all integration tests
+    summary: |
+      Run integration tests using httptest to verify HTTP monitoring
+      and webhook delivery logic without external dependencies.
+      Tests are in *_integration_test.go files.
+
+  # --------------------------------------------------------
+  # Testing tasks: end-to-end tests
+  # --------------------------------------------------------
+
+  e2e:
+    cmds:
+      - echo "Running end-to-end tests..."
+      - task: e2e:basic
+      - task: e2e:webhook
+    desc: run all end-to-end tests
+
+  e2e:basic:
+    dir: test/e2e
+    cmds:
+      - ./basic-monitoring.sh
+    desc: run basic smoke tests
+    summary: |
+      Run basic E2E smoke tests that verify:
+      - Binary executes successfully
+      - Version command works
+      - Config file is accepted
+
+  e2e:webhook:
+    dir: test/e2e
+    cmds:
+      - ./webhook-delivery.sh
+    desc: run webhook delivery tests
+    summary: |
+      Run E2E tests that verify webhook alert delivery:
+      - Start mock webhook server
+      - Run svc-mon against failing service
+      - Verify webhook receives alert with correct payload
+
+  # --------------------------------------------------------
+  # Testing tasks: benchmarks
+  # --------------------------------------------------------
+
+  benchmarks:
+    cmds:
+      - go test -bench=. -benchtime=5s ./...
+    desc: run all benchmarks

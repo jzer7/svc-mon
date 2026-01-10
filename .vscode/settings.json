@@ -1,0 +1,28 @@
+{
+    "files.exclude": {
+        "**/go.sum": true
+    },
+    "[go]": {
+        "editor.formatOnPaste": true,
+        "editor.formatOnSave": true,
+    },
+    "go.coverOnSave": false,
+    "go.coverOnSingleTest": true,
+    "go.testFlags": ["-v"],
+    "go.useLanguageServer": true,
+    "gopls": {
+        "build.buildFlags": ["-tags=integration"]
+    },
+    "markdown.validate.enabled": true,
+    "markdownlint.config": {
+        "default": true,
+        "MD012": false,   // Disable: no-multiple-blanks (empty lines improve readability)
+        "MD022": false,   // Disable: blank-around-heading
+        "MD029": false,   // Disable: Ordered list item prefix
+        "MD033": false,   // Disable: no-inline HTML (needed to use "<br>" over trailing spaces)
+    },
+    "[yaml]": {
+        "editor.autoIndent": "advanced"
+    },
+    "yaml.format.enable": true,
+}

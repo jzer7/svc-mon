@@ -1,0 +1,27 @@
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+---
+version: "3"
+
+vars:
+  ACT_JOB: '{{.ACT_JOB | default "test"}}'
+  ACT_IMAGE: "catthehacker/ubuntu:act-latest"
+
+tasks:
+  default:
+    cmds:
+      - act -j {{.ACT_JOB}} {{.ACT_ARGS}}
+    desc: run the GitHub actions locally to verify they work
+    vars:
+      ACT_ARGS: "-P ubuntu-latest={{.ACT_IMAGE}} --rm --verbose"
+
+  dryrun:
+    cmds:
+      - act -j {{.ACT_JOB}} {{.ACT_ARGS}} --dryrun --strict
+    desc: dryrun of the GitHub actions to verify they syntax is correct
+    vars:
+      ACT_ARGS: "-P ubuntu-latest={{.ACT_IMAGE}} --rm --verbose"
+
+  list-jobs:
+    cmds:
+      - act --list
+    desc: list available GitHub actions jobs

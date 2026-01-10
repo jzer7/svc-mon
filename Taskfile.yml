@@ -1,0 +1,131 @@
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+---
+version: "3"
+
+includes:
+  actions:
+    taskfile: tasks/Taskfile-act.yml
+    vars:
+      ACT_JOB: "test"
+  check: tasks/Taskfile-static.yml
+  clean: tasks/Taskfile-clean.yml
+  format: tasks/Taskfile-style.yml
+  test: tasks/Taskfile-test.yml
+
+vars:
+  GO_VERSION: "1.25.5"
+  OUT_DIR: bin # directory to place built binaries
+  SRC_DIR: cmd # directory containing source code for main packages
+  TOOL_DIR: tools # directory to install development tools
+  CLI_BINS: # list of command line binaries to build
+    - svc-mon
+
+tasks:
+  default:
+    aliases: [help]
+    desc: Show this help message
+    silent: true
+    cmds:
+      - echo "Available tasks:"
+      - echo ""
+      - task --list
+      - echo ""
+      - echo "  task --list                to see all available tasks"
+      - echo "  task --summary <TASK_NAME> to see details about task and subtasks"
+      - echo "  task <TASK_NAME>           to run a specific task."
+      - echo ""
+
+  # --------------------------------------------------------
+  # Setup tasks
+  # --------------------------------------------------------
+
+  setup:
+    cmds:
+      - mkdir -p {{.OUT_DIR}}
+      - task: setup:tools
+      - task: setup:packages
+    desc: prepare the development environment (e.g., install dependencies)
+
+  setup:packages:
+    cmds:
+      - go mod tidy -go={{.GO_VERSION}}
+      - go mod download
+    desc: install required packages
+
+  setup:tools:
+    cmds:
+      - mkdir -p {{.TOOL_DIR}}
+      - go install -v github.com/go-delve/delve/cmd/dlv@latest
+      - go install -v github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+      - go install -v github.com/spf13/cobra-cli@latest
+      - go install -v golang.org/x/tools/cmd/goimports@latest
+      - go install -v golang.org/x/tools/gopls@latest
+      - go install -v honnef.co/go/tools/cmd/staticcheck@latest
+    env:
+      GOBIN: "{{joinPath .ROOT_DIR .TOOL_DIR}}"
+    desc: install required development tools
+
+  # --------------------------------------------------------
+  # Top level task
+  # --------------------------------------------------------
+
+  validate:
+    cmds:
+      - task: clean
+      - task: format
+      - task: check
+      - task: test
+    desc: run all checks and tests to validate code health
+
+  # --------------------------------------------------------
+  # Dependency management tasks
+  # --------------------------------------------------------
+
+  deps:update:
+    cmds:
+      - go mod tidy
+      - go get -u ./...
+    desc: update all dependencies to their latest versions
+
+  # --------------------------------------------------------
+  # Build tasks
+  # --------------------------------------------------------
+
+  build:
+    cmds:
+      - echo "[BUILD] Building all binaries..."
+      - for: { var: CLI_BINS }
+        task: build:{{.ITEM}}
+    deps:
+      - clean
+      - format:code
+      - check
+    desc: build all artifacts in this project
+
+  build:*:
+    vars:
+      EXE: "{{index .MATCH 0}}"
+      MAIN_DIR: "{{.SRC_DIR}}/{{.EXE}}"
+    cmds:
+      - echo "[BUILD] Building '{{.EXE}}'..."
+      - mkdir -p '{{.OUT_DIR}}'
+      - go build -o '{{.OUT_DIR}}/{{.EXE}}' './{{.MAIN_DIR}}'
+    sources:
+      - "./cmd/**/*.go"
+      - "./internal/**/*.go"
+      - exclude: "**/*_test.go"
+    generates:
+      - "{{.OUT_DIR}}/{{.EXE}}"
+    desc: build the main binary
+    summary: |
+      Build the main binary for this application
+
+  # --------------------------------------------------------
+  # Other
+  # --------------------------------------------------------
+
+  todo:
+    cmds:
+      - echo "[TODO] listing all TODO and FIXME comments in the codebase..."
+      - find . -name '*.go' -print0|xargs -0 grep -E '#.*(FIXME|DEBUG|TODO|HACK|TEMP)' || echo "No TODO/FIXME comments found"
+    desc: list all TODO and FIXME comments in the codebase

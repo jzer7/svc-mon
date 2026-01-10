@@ -1,0 +1,32 @@
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+---
+version: "3"
+
+vars:
+  TOOL_DIR: '{{.TOOL_DIR | default "tools"}}'
+
+tasks:
+  default:
+    cmds:
+      - task: lint
+      - task: vet
+      - task: staticcheck
+    desc: run all static analysis checks to validate code health
+
+  lint:
+    cmds:
+      - "{{.TOOL_DIR}}/golangci-lint run './...'"
+    desc: run the code linter
+    summary: Run the linter to check for code issues
+
+  vet:
+    cmds:
+      - go vet './...'
+    desc: run go vet
+    summary: Run go vet to check for suspicious constructs
+
+  staticcheck:
+    cmds:
+      - "{{.TOOL_DIR}}/staticcheck -checks all './...'"
+    desc: run staticcheck
+    summary: Run staticcheck to find bugs and performance issues

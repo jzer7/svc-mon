@@ -1,0 +1,40 @@
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+---
+version: "3"
+
+tasks:
+  default:
+    cmds:
+      - task: code
+      - task: docs
+    desc: format code, and documentation files
+
+  code:
+    cmds:
+      - go fmt ./...
+    desc: format Go files
+
+  docs:
+    cmds:
+      - prettier --write '**/*.md'
+    desc: format documentation files
+
+  # --------------------------------------------------------
+  # Are the tasks below used? If not, consider removing them.
+  # --------------------------------------------------------
+
+  # check:
+  #   cmds:
+  #     - task:  code:check
+  #     - task:  docs:check
+  #   desc: check format of project files
+
+  # code:check:
+  #   cmds:
+  #     - go fmt ./...
+  #   desc: check format of Go files
+
+  # docs:check:
+  #   cmds:
+  #     - prettier --check ./**/*.md
+  #   desc: check format of documentation files

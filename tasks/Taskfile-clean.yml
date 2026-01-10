@@ -1,0 +1,40 @@
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+---
+version: "3"
+
+vars:
+  OUT_DIR: '{{.OUT_DIR | default "bin"}}'
+
+tasks:
+  default:
+    cmds:
+      - task: logs
+    desc: clean up most common artifacts
+
+  build:
+    cmds:
+      - rm -f {{.OUT_DIR}}/*
+    desc: clean up build artifacts
+
+  tooling:
+    cmds:
+      - echo "[CLEAN] removing tooling caches and artifacts..."
+    desc: clean up tooling caches and artifacts
+
+  test:
+    cmds:
+      - rm -f ./coverage.out ./coverage.html
+    desc: clean up test artifacts
+
+  logs:
+    cmds:
+      - find . -type f -maxdepth 1 -name "*.log*" -delete
+    desc: clean up log and snapshot files
+
+  full:
+    cmds:
+      - task: build
+      - task: tooling
+      - task: test
+      - task: logs
+    desc: full clean up including produced artifacts
