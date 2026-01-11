@@ -12,7 +12,7 @@ tasks:
       - act -j {{.ACT_JOB}} {{.ACT_ARGS}}
     desc: run the GitHub actions locally to verify they work
     vars:
-      ACT_ARGS: "-P ubuntu-latest={{.ACT_IMAGE}} --rm --verbose"
+      ACT_ARGS: "-P ubuntu-latest={{.ACT_IMAGE}} --rm"
 
   dryrun:
     cmds:

@@ -72,7 +72,7 @@ tasks:
   validate:
     cmds:
       - task: clean
-      - task: format
+      - task: format:code
       - task: check
       - task: test
     desc: run all checks and tests to validate code health
