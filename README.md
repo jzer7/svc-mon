@@ -1,6 +1,7 @@
 # Service Monitor
 
 [![Continuous Integration - Go](https://github.com/jzer7/svc-mon/actions/workflows/ci-go.yaml/badge.svg)](https://github.com/jzer7/svc-mon/actions/workflows/ci-go.yaml)
+[![license - MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
 Service Monitor is a tool designed to monitor the health of various services in your infrastructure.
 It is opinionated towards simplicity and ease of use, making it easy to configure and deploy.
@@ -94,3 +95,8 @@ To run tests, use the following command:
 ```sh
 task test
 ```
+
+## License
+
+Service Monitor is licensed under the MIT License.
+See the [LICENSE](LICENSE) file for details.
