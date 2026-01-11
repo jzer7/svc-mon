@@ -1,0 +1,23 @@
+# yaml-language-server: $schema=../schemas/config.schema.json
+---
+services:
+  - name: Example Service
+    url: http://service.example.com/health
+    interval: 60s
+    timeout: 5s
+    alert_if:
+      - dns_failure
+      - timeout
+      - http_5xx
+    webhooks:
+      - http://your-webhook-url.com/alert
+      - http://separate-webhook-url.com/alert
+  - name: Another Service
+    url: http://another-service.example.com/status
+    alert_if:
+      - http_5xx
+    webhooks:
+      - http://your-webhook-url.com/alert
+defaults:
+  interval: 300s
+  timeout: 10s

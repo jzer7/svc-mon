@@ -1,0 +1,60 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "services": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "url"],
+        "properties": {
+          "name": { "type": "string" },
+          "url": { "type": "string", "format": "uri" },
+          "interval": {
+            "type": "string",
+            "pattern": "^\\d+s$",
+            "description": "Duration in seconds, e.g., '60s'"
+          },
+          "timeout": {
+            "type": "string",
+            "pattern": "^\\d+s$",
+            "description": "Timeout in seconds, e.g., '5s'"
+          },
+          "alert_if": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": ["dns_failure", "timeout", "http_5xx"],
+              "description": "Alert condition (case-insensitive)"
+            },
+            "uniqueItems": true
+          },
+          "webhooks": {
+            "type": "array",
+            "items": { "type": "string", "format": "uri" },
+            "uniqueItems": true
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "defaults": {
+      "type": "object",
+      "properties": {
+        "interval": {
+          "type": "string",
+          "pattern": "^\\d+s$",
+          "description": "Default interval in seconds, e.g., '300s'"
+        },
+        "timeout": {
+          "type": "string",
+          "pattern": "^\\d+s$",
+          "description": "Default timeout in seconds, e.g., '10s'"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "required": ["services"],
+  "additionalProperties": false
+}
