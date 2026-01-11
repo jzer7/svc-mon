@@ -1,0 +1,19 @@
+# yaml-language-server: $schema=../../schemas/config.schema.json
+---
+# Test configuration for E2E tests
+# Uses localhost services and webhook endpoints
+
+services:
+  - name: Mock Health Service
+    url: http://localhost:9999/health
+    interval: 10s
+    timeout: 2s
+    alert_if:
+      - timeout
+      - http_5xx
+    webhooks:
+      - http://localhost:8888/webhook
+
+defaults:
+  interval: 10s
+  timeout: 5s
