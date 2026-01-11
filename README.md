@@ -1,5 +1,7 @@
 # Service Monitor
 
+[![Continuous Integration - Go](https://github.com/jzer7/svc-mon/actions/workflows/ci-go.yaml/badge.svg)](https://github.com/jzer7/svc-mon/actions/workflows/ci-go.yaml)
+
 Service Monitor is a tool designed to monitor the health of various services in your infrastructure.
 It is opinionated towards simplicity and ease of use, making it easy to configure and deploy.
 
