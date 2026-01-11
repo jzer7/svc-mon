@@ -17,16 +17,13 @@ tasks:
     cmds:
       - "{{.TOOL_DIR}}/golangci-lint run './...'"
     desc: run the code linter
-    summary: Run the linter to check for code issues
 
   vet:
     cmds:
       - go vet './...'
-    desc: run go vet
-    summary: Run go vet to check for suspicious constructs
+    desc: run go vet to check for suspicious constructs
 
   staticcheck:
     cmds:
       - "{{.TOOL_DIR}}/staticcheck -checks all './...'"
-    desc: run staticcheck
-    summary: Run staticcheck to find bugs and performance issues
+    desc: run staticcheck to find bugs and performance issues

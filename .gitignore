@@ -23,6 +23,7 @@ coverage.html
 go.work
 .specstory/
 
-bin/*
-sandbox/*
+bin/
+sandbox/
+tools/
 .task/

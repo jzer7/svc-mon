@@ -1,6 +1,6 @@
 module github.com/jzer7/svc-mon
 
-go 1.25
+go 1.25.5
 
 require (
 	github.com/spf13/cobra v1.10.2

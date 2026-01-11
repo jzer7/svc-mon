@@ -3,22 +3,15 @@ on:
   push:
     branches:
       - main
-  pull_request:
-    branches:
-      - main
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  test:
-    name: Test on ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest]
-    runs-on: ${{ matrix.os }}
+  benchmark:
+    name: Benchmark
+    runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
       contents: read
@@ -41,20 +34,9 @@ jobs:
       - name: Prepare environment
         run: task setup
 
-      - name: Check code formatting
-        run: task format:code
-
-      - name: Static analysis
-        run: task check
-
-      - name: Unit tests
-        run: task test:unit
-
-      - name: Integration tests
-        run: task test:integration
-
       - name: Build
         run: task build
 
-      - name: End-to-end tests
-        run: task test:e2e
+      - name: Benchmark tests
+        run: task test:benchmarks
+

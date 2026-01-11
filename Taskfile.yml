@@ -13,7 +13,6 @@ includes:
   test: tasks/Taskfile-test.yml
 
 vars:
-  GO_VERSION: '{{.GO_VERSION | default "1.25"}}'
   OUT_DIR: bin # directory to place built binaries
   SRC_DIR: cmd # directory containing source code for main packages
   TOOL_DIR: tools # directory to install development tools
@@ -23,7 +22,7 @@ vars:
 tasks:
   default:
     aliases: [help]
-    desc: Show this help message
+    desc: show this help message
     silent: true
     cmds:
       - echo "Available tasks:"
@@ -44,29 +43,40 @@ tasks:
       - mkdir -p {{.OUT_DIR}}
       - task: setup:tools
       - task: setup:packages
-    desc: prepare the development environment (e.g., install dependencies)
-
-  setup:packages:
-    cmds:
-      - go mod tidy -go={{.GO_VERSION}}
-      - go mod download
-    desc: install required packages
+    desc: prepare the environment (get tools and install dependencies)
 
   setup:tools:
     cmds:
       - mkdir -p {{.TOOL_DIR}}
-      - go install -v github.com/go-delve/delve/cmd/dlv@latest
       - go install -v github.com/golangci/golangci-lint/cmd/golangci-lint@latest
-      - go install -v github.com/spf13/cobra-cli@latest
-      - go install -v golang.org/x/tools/cmd/goimports@latest
-      - go install -v golang.org/x/tools/gopls@latest
       - go install -v honnef.co/go/tools/cmd/staticcheck@latest
     env:
       GOBIN: "{{joinPath .ROOT_DIR .TOOL_DIR}}"
     desc: install required development tools
 
+  setup:packages:
+    cmds:
+      - go mod tidy
+    generates:
+      - go.sum
+    desc: install required packages
+
+  setup:packages:update:
+    cmds:
+      - go mod tidy -go={{.GO_VERSION}}
+      - go get -u ./...
+    generates:
+      - go.sum
+    vars:
+      GO_VERSION: '{{.GO_VERSION | default "1.25"}}'
+    desc: update all dependencies to their latest versions
+    summary: |
+      Update all dependencies to their latest versions and tidy up go.mod and go.sum.
+      Pass in GO_VERSION to specify the Go version for the module.
+      E.g., `task setup:packages:update GO_VERSION=1.25`
+
   # --------------------------------------------------------
-  # Top level task
+  # Top level validation task
   # --------------------------------------------------------
 
   validate:
@@ -74,18 +84,11 @@ tasks:
       - task: clean
       - task: format:code
       - task: check
-      - task: test
+      - task: test:unit
+      - task: test:integration
+      - task: build
+      - task: test:e2e
     desc: run all checks and tests to validate code health
-
-  # --------------------------------------------------------
-  # Dependency management tasks
-  # --------------------------------------------------------
-
-  deps:update:
-    cmds:
-      - go mod tidy
-      - go get -u ./...
-    desc: update all dependencies to their latest versions
 
   # --------------------------------------------------------
   # Build tasks
@@ -96,10 +99,6 @@ tasks:
       - echo "[BUILD] Building all binaries..."
       - for: { var: CLI_BINS }
         task: build:{{.ITEM}}
-    deps:
-      - clean
-      - format:code
-      - check
     desc: build all artifacts in this project
 
   build:*:
@@ -113,6 +112,7 @@ tasks:
     sources:
       - "./cmd/**/*.go"
       - "./internal/**/*.go"
+      - "go.sum"
       - exclude: "**/*_test.go"
     generates:
       - "{{.OUT_DIR}}/{{.EXE}}"

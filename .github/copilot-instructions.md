@@ -31,7 +31,7 @@ This project uses [Task](https://taskfile.dev/) as its build tool, NOT Make or g
 ```bash
 task                    # Show help and available tasks
 task setup              # Install tools and dependencies (run first)
-task build              # Build all binaries (includes clean, format, check)
+task build              # Build all binaries
 task validate           # Run full validation pipeline
 task test               # Run all tests (unit, integration, e2e, benchmarks)
 task test:unit          # Run unit tests only
@@ -40,8 +40,6 @@ task check              # Run linters and static analysis
 task format             # Format code and documentation files
 task clean              # Remove most common artifacts
 ```
-
-**Critical**: The build process has dependencies - `task build` automatically runs `clean`, `format:code`, and `check` before building.
 
 ### Development Tools
 
@@ -67,7 +65,7 @@ Tools are installed locally in `tools/` directory (not globally) via `task setup
 Integration tests use Go's `httptest` package to create mock HTTP servers without external dependencies:
 
 ```go
-// Example from internal/svcmon/monitor_integration_test.go
+// Example from internal/core/monitor_integration_test.go
 server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
     w.WriteHeader(http.StatusInternalServerError)
 }))
@@ -79,8 +77,8 @@ defer server.Close()
 
 **Integration test files**:
 
-- `internal/svcmon/monitor_integration_test.go` - HTTP monitoring scenarios (200/5xx/timeouts/DNS failures)
-- `internal/svcmon/webhook_integration_test.go` - Webhook delivery, retries, multiple endpoints
+- `internal/core/monitor_integration_test.go` - HTTP monitoring scenarios (200/5xx/timeouts/DNS failures)
+- `internal/core/webhook_integration_test.go` - Webhook delivery, retries, multiple endpoints
 
 **Run**: `task test:integration` (filters for tests with "Integration" in name)
 
