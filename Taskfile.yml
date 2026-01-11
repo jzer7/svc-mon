@@ -6,14 +6,14 @@ includes:
   actions:
     taskfile: tasks/Taskfile-act.yml
     vars:
-      ACT_JOB: "test"
+      ACT_JOB: '{{.ACT_JOB | default "test"}}'
   check: tasks/Taskfile-static.yml
   clean: tasks/Taskfile-clean.yml
   format: tasks/Taskfile-style.yml
   test: tasks/Taskfile-test.yml
 
 vars:
-  GO_VERSION: "1.25.5"
+  GO_VERSION: '{{.GO_VERSION | default "1.25"}}'
   OUT_DIR: bin # directory to place built binaries
   SRC_DIR: cmd # directory containing source code for main packages
   TOOL_DIR: tools # directory to install development tools
