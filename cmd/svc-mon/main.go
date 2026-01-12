@@ -16,9 +16,8 @@ var (
 )
 
 func main() {
-
 	// The root command (i.e., svc-mon)
-	var rootCmd = &cobra.Command{
+	rootCmd := &cobra.Command{
 		Use:   "svc-mon",
 		Short: "Service Monitor",
 		Long:  `svc-mon is a tool to monitor the health of various network services.`,
@@ -28,17 +27,18 @@ func main() {
 	}
 
 	// The monitor command to start monitoring services (i.e., svc-mon monitor)
-	var monitorCmd = &cobra.Command{
+	monitorCmd := &cobra.Command{
 		Use:   "monitor",
 		Short: "Start monitoring services",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			configPath, _ := cmd.Flags().GetString("config")
-			return core.Run(configPath)
+			dryRun, _ := cmd.Flags().GetBool("dry-run")
+			return core.Run(configPath, dryRun)
 		},
 	}
 
 	// The version command to print the version (i.e., svc-mon version)
-	var versionCmd = &cobra.Command{
+	versionCmd := &cobra.Command{
 		Use:   "version",
 		Short: "Print the version number",
 		Run: func(cmd *cobra.Command, args []string) {

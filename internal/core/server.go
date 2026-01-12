@@ -12,7 +12,8 @@ import (
 )
 
 // Run starts the monitoring server with the given configuration file
-func Run(configPath string) error {
+// If dryRun is true, validates configuration and exits without monitoring
+func Run(configPath string, dryRun bool) error {
 	// Load configuration
 	cfg, err := LoadConfig(configPath)
 	if err != nil {
@@ -20,6 +21,20 @@ func Run(configPath string) error {
 	}
 
 	slog.Info("loaded configuration", "services", len(cfg.Services))
+
+	if dryRun {
+		slog.Info("dry-run mode: configuration is valid")
+		for _, svc := range cfg.Services {
+			slog.Info("service configured",
+				"name", svc.Name,
+				"url", svc.URL,
+				"interval", svc.Interval,
+				"timeout", svc.Timeout,
+				"alert_conditions", svc.AlertIf,
+				"webhooks", len(svc.Webhooks))
+		}
+		return nil
+	}
 
 	// Create cancellable context for graceful shutdown
 	ctx, cancel := context.WithCancel(context.Background())

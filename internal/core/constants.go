@@ -4,7 +4,7 @@ import "time"
 
 const (
 	// Default monitoring intervals and timeouts
-	DefaultInterval         = 300 * time.Second // 5 minutes
+	DefaultInterval         = 3 * 60 * time.Second
 	DefaultTimeout          = 5 * time.Second
 	WebhookTimeout          = 10 * time.Second
 	WebhookRetries          = 3
