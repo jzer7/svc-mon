@@ -36,6 +36,7 @@ vars:
   TOOL_DIR: tools # directory to install development tools
   CLI_BINS: # list of command line binaries to build
     - svc-mon
+    - webhook-logger
 
 tasks:
   default:
