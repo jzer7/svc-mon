@@ -48,12 +48,23 @@ Each webhook receives a JSON payload containing details about the alert.
 
 ```json
 {
-  "service": "Example Service",
-  "url": "http://example.com/health",
+  "service_name": "Example Service",
+  "service_url": "http://example.com/health",
   "status": "down",
-  "reason": "timeout"
+  "reason": "http_5xx",
+  "status_code": 500,
+  "timestamp": "2026-01-11T23:17:12Z"
 }
 ```
+
+The payload includes:
+
+- `service_name`: Name of the service that failed
+- `service_url`: URL that was monitored
+- `status`: Current status (`"up"` or `"down"`)
+- `reason`: Failure reason (`"timeout"`, `"http_5xx"`, or `"dns_failure"`)
+- `status_code`: HTTP status code (omitted for non-HTTP failures)
+- `timestamp`: ISO 8601 timestamp of the check
 
 Advanced configuration options are available. For example:
 
