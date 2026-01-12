@@ -2,16 +2,7 @@
 ---
 version: "3"
 
-vars: {}
-
 tasks:
-  default:
-    cmds:
-      - task: unit
-      - task: integration
-      - task: e2e
-      - task: benchmarks
-    desc: run all tests
 
   # --------------------------------------------------------
   # Testing tasks: unit tests
@@ -28,6 +19,9 @@ tasks:
       - go tool cover -html=coverage.out -o coverage.html
       - cmd: echo "Coverage report generated at coverage.html"
         silent: true
+    generates:
+      - coverage.out
+      - coverage.html
     desc: generate code coverage report
 
   # --------------------------------------------------------
@@ -36,9 +30,8 @@ tasks:
 
   integration:
     cmds:
-      - echo "Running integration tests with httptest..."
       - go test -v -run "Integration" ./internal/core/
-    desc: run all integration tests
+    desc: run integration tests
     summary: |
       Run integration tests using httptest to verify HTTP monitoring
       and webhook delivery logic without external dependencies.
@@ -50,10 +43,9 @@ tasks:
 
   e2e:
     cmds:
-      - echo "Running end-to-end tests..."
       - task: e2e:basic
       - task: e2e:webhook
-    desc: run all end-to-end tests
+    desc: run end-to-end tests
 
   e2e:basic:
     dir: test/e2e

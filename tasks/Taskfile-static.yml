@@ -6,24 +6,15 @@ vars:
   TOOL_DIR: '{{.TOOL_DIR | default "tools"}}'
 
 tasks:
-  default:
+  setup:
     cmds:
-      - task: lint
-      - task: vet
-      - task: staticcheck
-    desc: run all static analysis checks to validate code health
+      - mkdir -p {{.TOOL_DIR}}
+      - curl -sSfL https://golangci-lint.run/install.sh | sh -s -- -b {{.TOOL_DIR}} {{.GOLANGCI_LINT_VERSION}}
+    env:
+      GOBIN: "{{joinPath .ROOT_DIR .TOOL_DIR}}"
+    desc: install static code analysis tools
 
   lint:
     cmds:
       - "{{.TOOL_DIR}}/golangci-lint run './...'"
     desc: run the code linter
-
-  vet:
-    cmds:
-      - go vet './...'
-    desc: run go vet to check for suspicious constructs
-
-  staticcheck:
-    cmds:
-      - "{{.TOOL_DIR}}/staticcheck -checks all './...'"
-    desc: run staticcheck to find bugs and performance issues

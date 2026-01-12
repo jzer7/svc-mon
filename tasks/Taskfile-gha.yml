@@ -7,7 +7,7 @@ vars:
   ACT_IMAGE: "catthehacker/ubuntu:act-latest"
 
 tasks:
-  default:
+  run:
     cmds:
       - act -j {{.ACT_JOB}} {{.ACT_ARGS}}
     desc: run the GitHub actions locally to verify they work

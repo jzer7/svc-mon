@@ -36,7 +36,7 @@ task validate           # Run full validation pipeline
 task test               # Run all tests (unit, integration, e2e, benchmarks)
 task test:unit          # Run unit tests only
 task test:coverage      # Generate HTML coverage report
-task check              # Run linters and static analysis
+task lint               # Run linters and static analysis
 task format             # Format code and documentation files
 task clean              # Remove most common artifacts
 ```

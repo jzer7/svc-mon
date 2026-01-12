@@ -1,0 +1,31 @@
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+---
+version: "3"
+
+vars:
+  GO_MOD_VERSION:
+    sh: "cat go.mod | awk '/^go / {print $2}'"
+  GO_VERSION: '{{.GO_VERSION | default .GO_MOD_VERSION}}'
+  TOOL_DIR: '{{.TOOL_DIR | default "tools"}}'
+
+tasks:
+
+  get:
+    cmds:
+      - go mod tidy
+    generates:
+      - go.sum
+    desc: install required packages
+
+  update:
+    cmds:
+      - go mod tidy -go={{.GO_VERSION}}
+      - go get -u ./...
+    generates:
+      - go.sum
+    desc: update all dependencies to their latest versions
+    summary: |
+      Update all dependencies to their latest versions and tidy up go.mod and go.sum.
+      Pass in GO_VERSION to specify the Go version for the module.
+      E.g., `task setup:packages:update GO_VERSION=1.25`
+
