@@ -3,16 +3,34 @@
 version: "3"
 
 includes:
-  actions:
-    taskfile: tasks/Taskfile-act.yml
+  gha:
+    taskfile: tasks/Taskfile-local-gha.yml
+    internal: true
     vars:
       ACT_JOB: '{{.ACT_JOB | default "test"}}'
-  check: tasks/Taskfile-static.yml
-  clean: tasks/Taskfile-clean.yml
-  format: tasks/Taskfile-style.yml
+  sa:
+    taskfile: tasks/Taskfile-static.yml
+    internal: true
+    vars:
+      TOOL_DIR: "{{.TOOL_DIR}}"
+      GOLANGCI_LINT_VERSION: "{{.GOLANGCI_LINT_VERSION}}"
+  clean:
+    taskfile: tasks/Taskfile-clean.yml
+    internal: true
+  format:
+    taskfile: tasks/Taskfile-style.yml
+    internal: true
+    vars:
+      TOOL_DIR: "{{.TOOL_DIR}}"
+  packages:
+    taskfile: tasks/Taskfile-packages.yml
+    internal: true
   test: tasks/Taskfile-test.yml
 
 vars:
+  GO_VERSION:
+    sh: "cat go.mod | awk '/^go / {print $2}'"
+  GOLANGCI_LINT_VERSION: v2.8.0
   OUT_DIR: bin # directory to place built binaries
   SRC_DIR: cmd # directory containing source code for main packages
   TOOL_DIR: tools # directory to install development tools
@@ -29,9 +47,9 @@ tasks:
       - echo ""
       - task --list
       - echo ""
-      - echo "  task --list                to see all available tasks"
-      - echo "  task --summary <TASK_NAME> to see details about task and subtasks"
-      - echo "  task <TASK_NAME>           to run a specific task."
+      - echo "  task --list                  see all tasks"
+      - echo "  task --summary <TASK_NAME>   see task details"
+      - echo "  task <TASK_NAME>             run specific task"
       - echo ""
 
   # --------------------------------------------------------
@@ -41,49 +59,25 @@ tasks:
   setup:
     cmds:
       - mkdir -p {{.OUT_DIR}}
-      - task: setup:tools
-      - task: setup:packages
+      - task: sa:setup
+      - task: format:setup
+      - task: packages:get
     desc: prepare the environment (get tools and install dependencies)
 
-  setup:tools:
+  update:
     cmds:
-      - mkdir -p {{.TOOL_DIR}}
-      - go install -v github.com/golangci/golangci-lint/cmd/golangci-lint@latest
-      - go install -v honnef.co/go/tools/cmd/staticcheck@latest
-    env:
-      GOBIN: "{{joinPath .ROOT_DIR .TOOL_DIR}}"
-    desc: install required development tools
-
-  setup:packages:
-    cmds:
-      - go mod tidy
-    generates:
-      - go.sum
-    desc: install required packages
-
-  setup:packages:update:
-    cmds:
-      - go mod tidy -go={{.GO_VERSION}}
-      - go get -u ./...
-    generates:
-      - go.sum
-    vars:
-      GO_VERSION: '{{.GO_VERSION | default "1.25"}}'
-    desc: update all dependencies to their latest versions
-    summary: |
-      Update all dependencies to their latest versions and tidy up go.mod and go.sum.
-      Pass in GO_VERSION to specify the Go version for the module.
-      E.g., `task setup:packages:update GO_VERSION=1.25`
+      - task: packages:update
+    desc: update dependencies and development tools
 
   # --------------------------------------------------------
-  # Top level validation task
+  # Complete project validation tasks
   # --------------------------------------------------------
 
   validate:
     cmds:
       - task: clean
       - task: format:code
-      - task: check
+      - task: lint
       - task: test:unit
       - task: test:integration
       - task: build
@@ -91,22 +85,58 @@ tasks:
     desc: run all checks and tests to validate code health
 
   # --------------------------------------------------------
+  # Styling tasks
+  # --------------------------------------------------------
+
+  format:
+    cmds:
+      - task: format:code
+      - task: format:yaml
+    prompt: This task will modify files to conform to formatting standards. Continue? (y/n)
+    desc: format all code and documentation
+
+  format:check:
+    cmds:
+      - task: format:code:check
+      - task: format:yaml:check
+      - task: format:docs:check
+    desc: check format of all code and documentation
+
+  # --------------------------------------------------------
+  # Check tasks
+  # --------------------------------------------------------
+  lint:
+    cmds:
+      - task: sa:lint
+    desc: run all static analysis checks to validate code health
+
+  # --------------------------------------------------------
+  # Test tasks
+  # --------------------------------------------------------
+
+  test:
+    cmds:
+      - task: test:unit
+      - task: test:integration
+      - task: test:e2e
+      - task: test:benchmarks
+    desc: run all tests
+
+  # --------------------------------------------------------
   # Build tasks
   # --------------------------------------------------------
 
   build:
     cmds:
-      - echo "[BUILD] Building all binaries..."
-      - for: { var: CLI_BINS }
+      - for: {var: CLI_BINS}
         task: build:{{.ITEM}}
-    desc: build all artifacts in this project
+    desc: build all binaries
 
   build:*:
     vars:
       EXE: "{{index .MATCH 0}}"
       MAIN_DIR: "{{.SRC_DIR}}/{{.EXE}}"
     cmds:
-      - echo "[BUILD] Building '{{.EXE}}'..."
       - mkdir -p '{{.OUT_DIR}}'
       - go build -o '{{.OUT_DIR}}/{{.EXE}}' './{{.MAIN_DIR}}'
     sources:
@@ -121,11 +151,34 @@ tasks:
       Build the main binary for this application
 
   # --------------------------------------------------------
+  # Run GitHub Actions locally
+  # --------------------------------------------------------
+
+  actions:
+    cmds:
+      - task: gha:run
+    desc: run GitHub Actions workflows locally using act
+    summary: |
+      This task uses `act` to run GitHub Actions workflows locally.
+      Make sure you have `act` installed and configured properly.
+      You can specify the job to run using the ACT_JOB variable.
+      Example: `task actions ACT_JOB=experimental-job`
+
+  # --------------------------------------------------------
+  # Clean
+  # --------------------------------------------------------
+
+  clean:
+    cmds:
+      - task: clean:crumbs
+      - task: clean:test-artifacts
+    desc: clean all build and test artifacts
+
+  # --------------------------------------------------------
   # Other
   # --------------------------------------------------------
 
   todo:
     cmds:
-      - echo "[TODO] listing all TODO and FIXME comments in the codebase..."
-      - find . -name '*.go' -print0|xargs -0 grep -E '#.*(FIXME|DEBUG|TODO|HACK|TEMP)' || echo "No TODO/FIXME comments found"
-    desc: list all TODO and FIXME comments in the codebase
+      - find . -name '*.go' -o -name '*.sh' -print0 | xargs -0 grep -E '#.*(FIXME|DEBUG|TODO|HACK|TEMP)' || echo "No TODO/FIXME comments found"
+    desc: list TODO and FIXME comments

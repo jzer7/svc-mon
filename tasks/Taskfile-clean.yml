@@ -4,37 +4,33 @@ version: "3"
 
 vars:
   OUT_DIR: '{{.OUT_DIR | default "bin"}}'
+  TOOL_DIR: '{{.TOOL_DIR | default "tools"}}'
 
 tasks:
-  default:
-    cmds:
-      - task: logs
-    desc: clean up most common artifacts
-
-  build:
-    cmds:
-      - rm -f {{.OUT_DIR}}/*
-    desc: clean up build artifacts
-
-  tooling:
-    cmds:
-      - echo "[CLEAN] removing tooling caches and artifacts..."
-    desc: clean up tooling caches and artifacts
-
-  test:
-    cmds:
-      - rm -f ./coverage.out ./coverage.html
-    desc: clean up test artifacts
-
-  logs:
+  crumbs:
     cmds:
       - find . -type f -maxdepth 1 -name "*.log*" -delete
-    desc: clean up log and snapshot files
+    desc: clean artifacts created by the application
+
+  build-artifacts:
+    cmds:
+      - rm -f {{.OUT_DIR}}/*
+    desc: clean build artifacts
+
+  test-artifacts:
+    cmds:
+      - rm -f ./coverage.out ./coverage.html
+    desc: clean test artifacts
+
+  tooling-artifacts:
+    cmds:
+      - rm -rf {{.TOOL_DIR}}/*
+    desc: clean tooling artifacts, binaries, and caches
 
   full:
     cmds:
-      - task: build
-      - task: tooling
-      - task: test
-      - task: logs
-    desc: full clean up including produced artifacts
+      - task: build-artifacts
+      - task: crumbs
+      - task: tooling-artifacts
+      - task: test-artifacts
+    desc: clean all artifacts

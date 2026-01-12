@@ -3,38 +3,43 @@
 version: "3"
 
 tasks:
-  default:
+
+  setup:
     cmds:
-      - task: code
-      - task: docs
-    desc: format code, and documentation files
+      - mkdir -p {{.TOOL_DIR}}
+      - go install github.com/google/yamlfmt/cmd/yamlfmt@latest
+    env:
+      GOBIN: "{{joinPath .ROOT_DIR .TOOL_DIR}}"
+    desc: install formatting tools
 
   code:
     cmds:
       - go fmt ./...
-    desc: format Go files
+    desc: format Go code
+
+  code:check:
+    cmds:
+      - true
+    desc: check format of Go code
 
   docs:
     cmds:
       - prettier --write '**/*.md'
+    ignore_error: true
     desc: format documentation files
 
-  # --------------------------------------------------------
-  # Are the tasks below used? If not, consider removing them.
-  # --------------------------------------------------------
+  docs:check:
+    cmds:
+      - prettier --check ./**/*.md
+    ignore_error: true
+    desc: check format of documentation files
 
-  # check:
-  #   cmds:
-  #     - task:  code:check
-  #     - task:  docs:check
-  #   desc: check format of project files
+  yaml:
+    cmds:
+      - '{{.TOOL_DIR}}/yamlfmt -w .'
+    desc: format YAML files
 
-  # code:check:
-  #   cmds:
-  #     - go fmt ./...
-  #   desc: check format of Go files
-
-  # docs:check:
-  #   cmds:
-  #     - prettier --check ./**/*.md
-  #   desc: check format of documentation files
+  yaml:check:
+    cmds:
+      - '{{.TOOL_DIR}}/yamlfmt --lint -q .'
+    desc: check format of YAML files

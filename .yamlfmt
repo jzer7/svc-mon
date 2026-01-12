@@ -1,0 +1,10 @@
+---
+include:
+  - examples
+formatter:
+  type: basic
+  indent: 2
+  include_document_start: true
+  retain_line_breaks_single: true
+  trim_trailing_whitespace: true
+
