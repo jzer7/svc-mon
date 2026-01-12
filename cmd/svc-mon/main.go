@@ -4,6 +4,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"log/slog"
 	"os"
 
 	"github.com/jzer7/svc-mon/internal/core"
@@ -33,6 +34,18 @@ func main() {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			configPath, _ := cmd.Flags().GetString("config")
 			dryRun, _ := cmd.Flags().GetBool("dry-run")
+			verbose, _ := cmd.Flags().GetBool("verbose")
+
+			// Initialize logger based on verbose flag
+			logLevel := slog.LevelWarn
+			if verbose {
+				logLevel = slog.LevelInfo
+			}
+			logger := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
+				Level: logLevel,
+			}))
+			slog.SetDefault(logger)
+
 			return core.Run(configPath, dryRun)
 		},
 	}
