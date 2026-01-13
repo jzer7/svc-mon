@@ -4,14 +4,16 @@ on:
   push:
     branches:
       - main
+    tags:
+      - 'v*.*.*'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  benchmark:
-    name: Benchmark
+  release:
+    name: Build, test and release
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
@@ -35,9 +37,7 @@ jobs:
       - name: Prepare environment
         run: task setup
 
-      - name: Build
+      - name: Build binaries
         run: task build
 
-      - name: Benchmark tests
-        run: task test:benchmarks
-
+      - name: Release
