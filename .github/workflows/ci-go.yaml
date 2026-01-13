@@ -1,11 +1,18 @@
+---
 name: Continuous Integration - Go
 on:
   push:
     branches:
       - main
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
   pull_request:
     branches:
       - main
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -41,11 +48,11 @@ jobs:
       - name: Prepare environment
         run: task setup
 
-      - name: Check code formatting
-        run: task format:code
+      - name: Check formatting
+        run: task format:check
 
       - name: Static analysis
-        run: task check
+        run: task lint
 
       - name: Unit tests
         run: task test:unit
