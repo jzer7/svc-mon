@@ -139,7 +139,7 @@ jobs:
           mv bin/webhook-logger bin/webhook-logger-${{ matrix.platform }}-${{ matrix.arch }}
 
       - name: Upload binaries
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: binaries-${{ matrix.platform }}-${{ matrix.arch }}
           path: bin/*
