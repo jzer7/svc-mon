@@ -65,7 +65,7 @@ jobs:
           go-version-file: go.mod
 
       - name: Install Taskfile
-        uses: go-task/setup-task@v1
+        uses: go-task/setup-task@v2
         with:
           version: 3.46.x
 
@@ -114,7 +114,7 @@ jobs:
           go-version-file: go.mod
 
       - name: Install Taskfile
-        uses: go-task/setup-task@v1
+        uses: go-task/setup-task@v2
         with:
           version: 3.46.x
 
